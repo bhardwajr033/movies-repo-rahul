@@ -4,7 +4,7 @@ const dbConfig = new Pool({
   user: "postgres",
   host: "localhost",
   database: "movies-api-rahul",
-  password: "8253",
+  password: "postgres",
   port: 5432,
 });
 
