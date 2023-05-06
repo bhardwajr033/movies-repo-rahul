@@ -16,6 +16,10 @@ app.use("/api/movies", movies_router);
 app.use("/api/directors", director_router);
 app.use("/api/logs" , logs_router);
 
+app.use("/*" ,(req,res)=>{
+    res.status(404).send({Error : "request not found"})
+} )
+
 app.listen(PORT, () => {
   console.log(`Server has started at ${PORT}`);
 });
