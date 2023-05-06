@@ -1,5 +1,6 @@
 CREATE TABLE movies (
-  rank INTEGER PRIMARY KEY,
+  index SERIAL PRIMARY KEY,
+  rank INTEGER,
   title VARCHAR,
   description TEXT,
   runtime INTEGER,
