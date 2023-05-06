@@ -1,12 +1,14 @@
 CREATE TABLE movies (
-  id SERIAL PRIMARY KEY,
+  rank INTEGER PRIMARY KEY,
   title VARCHAR,
-  release_year INT,
+  description TEXT,
+  runtime INTEGER,
+  genre VARCHAR,
   rating FLOAT,
-  director_name VARCHAR REFERENCES directors(name) ON DELETE CASCADE
-);
-
-CREATE TABLE directors (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR UNIQUE
+  metascore INTEGER,
+  votes INTEGER,
+  gross_earning_in_mil FLOAT,
+  director_name VARCHAR,
+  actor VARCHAR,
+  release_year INTEGER
 );

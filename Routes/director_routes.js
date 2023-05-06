@@ -4,8 +4,8 @@ const dbConfig = require("../database/DBconfig");
 
 director_router.get("/", async (req, res) => {
   try {
-    const director = await dbConfig.query("SELECT * FROM directors");
-    res.json(director.rows);
+    const movies = await dbConfig.query("SELECT * FROM movies");
+    res.json(movies.rows);
   } catch (err) {
     console.log(err);
     res.status(500).send([{ Error: err.message }]);
