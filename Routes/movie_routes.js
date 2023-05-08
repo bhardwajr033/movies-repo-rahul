@@ -1,8 +1,9 @@
 const express = require("express");
-const movies_router = express.Router();
+
+const moviesRouter = express.Router();
 const dbConfig = require("../database/DBconfig");
 
-movies_router.get("/", async (req, res) => {
+moviesRouter.get("/", async (req, res) => {
   try {
     const movies = await dbConfig.query("SELECT * FROM movies;");
     if (movies.rows.length === 0) {
@@ -16,10 +17,10 @@ movies_router.get("/", async (req, res) => {
   }
 });
 
-movies_router.post("/", async (req, res) => {
+moviesRouter.post("/", async (req, res) => {
   try {
     const movie = req.body;
-    const dbinsertdirector = await dbConfig.query(
+    await dbConfig.query(
       "INSERT INTO directors (director_name) VALUES ($1);",
       [movie.director_name]
     );
@@ -55,10 +56,10 @@ movies_router.post("/", async (req, res) => {
   }
 });
 
-movies_router.get("/:movieId", async (req, res) => {
+moviesRouter.get("/:movieId", async (req, res) => {
   try {
     const movie = await dbConfig.query(
-      `SELECT * FROM movies WHERE rank = ${parseInt(req.params.movieId)};`
+      `SELECT * FROM movies WHERE rank = ${parseInt(req.params.movieId,10)};`
     );
     if (movie.rows.length === 0) {
       res.send([`No movies found with movieid of ${req.params.movieId}`]);
@@ -71,20 +72,21 @@ movies_router.get("/:movieId", async (req, res) => {
   }
 });
 
-movies_router.put("/:movieId", async (req, res) => {
+moviesRouter.put("/:movieId", async (req, res) => {
   try {
     const updatedDetails = req.body;
-    let movie = await dbConfig.query(
-      `SELECT * FROM movies WHERE rank = ${parseInt(req.params.movieId)};`
+    const dbResposeMovie = await dbConfig.query(
+      `SELECT * FROM movies WHERE rank = ${parseInt(req.params.movieId,10)};`
     );
-    movie = movie.rows[0];
+    const {rows} = dbResposeMovie;
+    const movie = rows[0];
     if (movie.length === 0) {
       res.send([`No movies found with movieid of ${req.params.movieId}`]);
       return;
     }
     const dbRespose = await dbConfig.query(
       `UPDATE movies SET  title = $1, description =  $2, runtime = $3, genre = $4, rating = $5, metascore = $6, votes = $7, gross_earning_in_mil = $8, director_name = $9, actor = $10, release_year = $11  WHERE rank = ${parseInt(
-        req.params.movieId
+        req.params.movieId,10
       )} RETURNING *;`,
       [
         updatedDetails.title || movie.title,
@@ -107,11 +109,11 @@ movies_router.put("/:movieId", async (req, res) => {
   }
 });
 
-movies_router.delete("/:movieId", async (req, res) => {
+moviesRouter.delete("/:movieId", async (req, res) => {
   try {
     const dbRespose = await dbConfig.query(
       `DELETE FROM movies WHERE rank = ${parseInt(
-        req.params.movieId
+        req.params.movieId,10
       )} RETURNING *;`
     );
     if (dbRespose.rows.length === 0) {
@@ -125,4 +127,4 @@ movies_router.delete("/:movieId", async (req, res) => {
   }
 });
 
-module.exports = movies_router;
+module.exports = moviesRouter;

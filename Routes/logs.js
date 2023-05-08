@@ -1,9 +1,10 @@
 const express = require("express");
-const logs_router = express.Router();
+
+const logsRouter = express.Router();
 const fs = require("fs").promises;
 const path = require("path");
 
-logs_router.get("/", async (req, res) => {
+logsRouter.get("/", async (req, res) => {
   try {
     const logFilePath = path.join(__dirname, "../Logs/access.log");
     const logs = await fs.readFile(logFilePath, "utf-8");
@@ -14,4 +15,4 @@ logs_router.get("/", async (req, res) => {
   }
 });
 
-module.exports = logs_router;
+module.exports = logsRouter;

@@ -1,4 +1,4 @@
-const Pool = require("pg").Pool;
+const {Pool} = require("pg");
 
 const dbConfig = new Pool({
   user: "postgres",

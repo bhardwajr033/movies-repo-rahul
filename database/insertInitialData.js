@@ -7,7 +7,8 @@ async function insertInitialData() {
     path.join(__dirname, "../data/movies.json"),
     "utf8"
   );
-  const movies = JSON.parse(readData).reduce((acc, movie) => {
+  const movies = JSON.parse(readData).reduce((acc, movieDetails) => {
+    const movie = [...movieDetails];
     if (movie.Gross_Earning_in_Mil === "NA") {
       movie.Gross_Earning_in_Mil = 0;
     }
@@ -47,7 +48,7 @@ async function insertInitialData() {
         movie.Director,
         movie.Actor,
         movie.Year,
-        movie.Director
+        movie.Director,
       ],
       (err, result) => {
         if (err) {
