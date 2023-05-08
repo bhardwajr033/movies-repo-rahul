@@ -11,24 +11,23 @@ datasource db {
 }
 
 model Directors {
-  id        Int     @id @default(autoincrement())
-  name      String  @unique
-  movies    Movies[]
+  id     Int      @id @default(autoincrement())
+  name   String   @unique
+  movies Movies[] @relation("director_movies")
 }
 
 model Movies {
-  id                   Int     @id @default(autoincrement())
-  rank                 Int     @unique
-  title                String
-  description          String
-  runtime              Int
-  genre                String
-  rating               Float
-  metascore            Int
-  votes                Int
-  gross_earning_in_mil Float
-  director             Directors @relation(fields: [directorId], references: [id])
-  directorId           Int
-  actor                String
-  release_year         Int
+  id                 Int        @id @default(autoincrement())
+  rank               Int        @unique
+  title              String
+  description        String
+  runtime            Int
+  genre              String
+  rating             Float
+  metascore          Int
+  votes              Int
+  grossEarningsInMil Float
+  releaseYear        Int
+  directorId         Int?
+  director           Directors? @relation("director_movies", fields: [directorId], references: [id])
 }

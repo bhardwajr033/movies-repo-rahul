@@ -7,8 +7,7 @@ async function insertInitialData() {
     path.join(__dirname, "../data/movies.json"),
     "utf8"
   );
-
-  const movies = JSON.parse(readData).reduce((acc, movieDetails) => {
+  const movies = JSON.parse(readData).map((movieDetails) => {
     const movie = { ...movieDetails };
     if (movie.Gross_Earning_in_Mil === "NA") {
       movie.Gross_Earning_in_Mil = 0;
@@ -16,9 +15,38 @@ async function insertInitialData() {
     if (movie.Metascore === "NA") {
       movie.Metascore = 0;
     }
-    acc.push(movie);
-    return acc;
-  }, []);
+    return movie;
+  });
+
+  movies.map(async (movie) => {
+    const director = await prisma.Directors.upsert({
+      where: { name: movie.Director },
+      update: {},
+      create: { name: movie.Director },
+    });
+
+    await prisma.Movies.create({
+      data: {
+        rank: movie.Rank,
+        title: movie.Title,
+        description: movie.Description,
+        runtime: movie.Runtime,
+        genre: movie.Genre,
+        rating: movie.Rating,
+        metascore: movie.Metascore,
+        votes: movie.Votes,
+        grossEarningsInMil: movie.Gross_Earning_in_Mil,
+        director: {
+          connect: { id: director.id },
+        },
+        releaseYear: movie.Year,
+      },
+    });
+  });
 }
 
-insertInitialData();
+insertInitialData()
+  .catch((e) => console.error(e))
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
