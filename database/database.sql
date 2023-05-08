@@ -1,6 +1,11 @@
+CREATE TABLE directors(
+  id SERIAL PRIMARY KEY,
+  director_name TEXT UNIQUE
+);
+
 CREATE TABLE movies (
-  index SERIAL PRIMARY KEY,
-  rank INTEGER,
+  id SERIAL PRIMARY KEY,
+  rank INTEGER UNIQUE,
   title VARCHAR,
   description TEXT,
   runtime INTEGER,
@@ -11,5 +16,7 @@ CREATE TABLE movies (
   gross_earning_in_mil FLOAT,
   director_name VARCHAR,
   actor VARCHAR,
-  release_year INTEGER
+  release_year INTEGER,
+  director_id INTEGER ,
+  FOREIGN KEY (director_id) REFERENCES directors(id) ON DELETE CASCADE
 );

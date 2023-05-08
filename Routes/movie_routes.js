@@ -6,21 +6,25 @@ movies_router.get("/", async (req, res) => {
   try {
     const movies = await dbConfig.query("SELECT * FROM movies;");
     if (movies.rows.length === 0) {
-        res.send(["No movies found"]);
-      } else {
-        res.json(movies.rows);
-      }
+      res.send(["No movies found"]);
+    } else {
+      res.json(movies.rows);
+    }
   } catch (err) {
     console.log(err);
-    res.status(500).send([{ Error: err.message }]);
+    res.status(600).send([{ Error: err.message }]);
   }
 });
 
 movies_router.post("/", async (req, res) => {
   try {
     const movie = req.body;
+    const dbinsertdirector = await dbConfig.query(
+      "INSERT INTO directors (director_name) VALUES ($1);",
+      [movie.director_name]
+    );
     const dbRespose = await dbConfig.query(
-      "INSERT INTO movies (rank, title, description, runtime, genre, rating, metascore, votes, gross_earning_in_mil, director_name, actor, release_year) VALUES ($1, $2 , $3 , $4 , $5 , $6 , $7 , $8 , $9 , $10 , $11 , $12) RETURNING *;",
+      "INSERT INTO movies (rank, title, description, runtime, genre, rating, metascore, votes, gross_earning_in_mil, director_name, actor, release_year , director_id) VALUES ($1, $2 , $3 , $4 , $5 , $6 , $7 , $8 , $9 , $10 , $11 , $12,(SELECT id FROM directors WHERE director_name = $13)) RETURNING *;",
       [
         movie.rank,
         movie.title,
@@ -34,12 +38,20 @@ movies_router.post("/", async (req, res) => {
         movie.director_name,
         movie.actor,
         movie.release_year,
+        movie.director_name
       ]
     );
     res.json(dbRespose.rows);
   } catch (err) {
     console.log(err);
-    res.status(500).send({ Error: err.message });
+    if (
+      err.message ===
+      'duplicate key value violates unique constraint "movies_rank_key"'
+    ) {
+      res.status(600).send({ Error: "Movie with that rank already exists" });
+    } else {
+      res.status(500).send({ Error: err.message });
+    }
   }
 });
 
