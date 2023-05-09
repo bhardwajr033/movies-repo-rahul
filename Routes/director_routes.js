@@ -1,15 +1,15 @@
 const express = require("express");
 
 const directoRouter = express.Router();
-const dbConfig = require("../database/DBconfig");
+const prisma = require("../database/DBconfig");
 
 directoRouter.get("/", async (req, res) => {
   try {
-    const directors = await dbConfig.query("SELECT * FROM directors;");
-    if (directors.rows.length === 0) {
+    const directors = await prisma.Directors.findMany({});
+    if (!directors) {
       res.send(["No Directors found"]);
     } else {
-      res.json(directors.rows);
+      res.json(directors);
     }
   } catch (err) {
     console.log(err);
@@ -19,12 +19,13 @@ directoRouter.get("/", async (req, res) => {
 
 directoRouter.post("/", async (req, res) => {
   try {
-    const director = req.body;
-    const dbRespose = await dbConfig.query(
-      "INSERT INTO directors (director_name) VALUES ($1) RETURNING *;",
-      [director.director_name]
-    );
-    res.json(dbRespose.rows);
+    const data = req.body;
+    const director = await prisma.Directors.upsert({
+      where: { name: data.name },
+      update: {},
+      create: { name: data.name },
+    });
+    res.json(director);
   } catch (err) {
     console.log(err);
     res.status(500).send({ Error: err.message });
@@ -33,15 +34,17 @@ directoRouter.post("/", async (req, res) => {
 
 directoRouter.get("/:directorId", async (req, res) => {
   try {
-    const director = await dbConfig.query(
-      `SELECT * FROM directors WHERE id = ${parseInt(req.params.directorId,10)};`
-    );
-    if (director.rows.length === 0) {
-      res.send([
-        `No directors found with directorId of ${req.params.directorId}`,
-      ]);
+    const director = await prisma.Directors.findUnique({
+      where: {
+        id: Number(req.params.directorId),
+      },
+    });
+    if (!director) {
+      res.send({
+        "Not Found": `No directors found with directorId of ${req.params.directorId}`,
+      });
     } else {
-      res.json(director.rows);
+      res.json(director);
     }
   } catch (err) {
     console.log(err);
@@ -51,48 +54,40 @@ directoRouter.get("/:directorId", async (req, res) => {
 
 directoRouter.put("/:directorId", async (req, res) => {
   try {
-    const updatedDetails = req.body;
-    const dbResposeDirector = await dbConfig.query(
-      `SELECT * FROM directors WHERE id = ${parseInt(req.params.directorId,10)};`
-    );
-    const {rows} = dbResposeDirector;
-    const director = rows[0];
-    if (director.length === 0) {
-      res.send([
-        `No directors found with directorId of ${req.params.directorId}`,
-      ]);
-      return;
-    }
-    const dbRespose = await dbConfig.query(
-      `UPDATE directors SET director_name = $1 WHERE id = ${parseInt(
-        req.params.directorId,10
-      )} RETURNING *;`,
-      [updatedDetails.director_name || director.director_name]
-    );
-    res.json(dbRespose.rows);
+    const directorUpdated = await prisma.Directors.update({
+      where: {
+        id: Number(req.params.directorId),
+      },
+      data: {
+        name: req.body.name,
+      },
+    });
+    res.json(directorUpdated);
   } catch (err) {
     console.log(err);
-    res.status(500).send([{ Error: err.message }]);
+    res.status(500).send({ Error: err.message });
   }
 });
 
 directoRouter.delete("/:directorId", async (req, res) => {
   try {
-    const dbRespose = await dbConfig.query(
-      `DELETE FROM directors WHERE id = ${parseInt(
-        req.params.directorId,10
-      )} RETURNING *;`
-    );
-    if (dbRespose.rows.length === 0) {
-      res.send([`No director found with directorId of ${req.params.directorId}`]);
+    const directorDeleted = await prisma.Directors.delete({
+      where: {
+        id: Number(req.params.directorId),
+      },
+    });
+
+    if (!directorDeleted) {
+      res.send({
+        "Not Found": `No director found with directorId of ${req.params.directorId}`,
+      });
     } else {
-      res.json(dbRespose.rows);
+      res.json(directorDeleted);
     }
   } catch (err) {
     console.log(err);
     res.status(500).send([{ Error: err.message }]);
   }
 });
-
 
 module.exports = directoRouter;
