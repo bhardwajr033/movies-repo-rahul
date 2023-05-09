@@ -36,10 +36,11 @@ async function insertInitialData() {
         metascore: movie.Metascore,
         votes: movie.Votes,
         grossEarningsInMil: movie.Gross_Earning_in_Mil,
+        actor: movie.Actor,
+        releaseYear: movie.Year,
         director: {
           connect: { id: director.id },
         },
-        releaseYear: movie.Year,
       },
     });
   });

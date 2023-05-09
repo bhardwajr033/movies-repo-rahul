@@ -27,6 +27,7 @@ model Movies {
   metascore          Int
   votes              Int
   grossEarningsInMil Float
+  actor              String
   releaseYear        Int
   directorId         Int?
   director           Directors? @relation("director_movies", fields: [directorId], references: [id])
