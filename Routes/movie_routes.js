@@ -148,6 +148,19 @@ moviesRouter.put(
 
       const movie = req.body;
 
+      const isMovieNotExists = await prisma.Movies.findUnique({
+        where: {
+          rank: Number(req.params.movieId),
+        },
+      });
+
+      if (!isMovieNotExists) {
+        res
+          .status(422)
+          .send({ Error: `Movie with rank ${req.params.movieId} does not exists.` });
+        return;
+      }
+
       const directorDetail = await prisma.Movies.findUnique({
         where: {
           rank: Number(req.params.movieId),
