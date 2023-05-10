@@ -14,7 +14,39 @@ exports.checkReqBodyExists = [
 exports.movieIdParamSchema = param("movieId")
   .notEmpty()
   .isInt()
-  .withMessage("MovieID(rank) parameter must be an integer");
+  .custom((value) => value > 0)
+  .withMessage("MovieID(rank) parameter must be a positive integer");
+
+exports.checkMovieBodyFields = [
+  body().custom((value, { req }) => {
+    const allowedFields = [
+      "rank",
+      "title",
+      "description",
+      "runtime",
+      "genre",
+      "rating",
+      "metascore",
+      "votes",
+      "grossEarningsInMil",
+      "actor",
+      "releaseYear",
+      "director",
+    ];
+    const requestBodyKeys = Object.keys(req.body);
+    const invalidFields = requestBodyKeys.filter(
+      (key) => !allowedFields.includes(key)
+    );
+
+    if (invalidFields.length > 0) {
+      throw new Error(
+        `Invalid field(s) found in request body: ${invalidFields.join(", ")}`
+      );
+    }
+
+    return true;
+  }),
+];
 
 exports.moviePostSchema = checkSchema({
   rank: {
@@ -22,7 +54,11 @@ exports.moviePostSchema = checkSchema({
       errorMessage: "rank field is required ",
     },
     isInt: {
-      errorMessage: "rank must be an integer",
+      errorMessage: "rank must be a positive integer",
+    },
+    custom: {
+      options: (value) => value > 0,
+      errorMessage: "Rank must be a positive integer.",
     },
   },
   title: {
@@ -192,7 +228,26 @@ exports.moviePutSchema = checkSchema({
 exports.directorIdParamSchema = param("directorId")
   .notEmpty()
   .isInt()
+  .custom((value) => value > 0)
   .withMessage("directorId parameter must be an integer");
+
+exports.checkDirectorBodyFields = [
+  body().custom((value, { req }) => {
+    const allowedFields = ["name"];
+    const requestBodyKeys = Object.keys(req.body);
+    const invalidFields = requestBodyKeys.filter(
+      (key) => !allowedFields.includes(key)
+    );
+
+    if (invalidFields.length > 0) {
+      throw new Error(
+        `Invalid field(s) found in request body: ${invalidFields.join(", ")}`
+      );
+    }
+
+    return true;
+  }),
+];
 
 exports.directorPostSchema = checkSchema({
   name: {

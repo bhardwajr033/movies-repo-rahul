@@ -21,13 +21,17 @@ moviesRouter.get("/", async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).send([{ Error: err.message }]);
+    res.status(500).send([{ Error: "Something Went Wrong" }]);
   }
 });
 
 moviesRouter.post(
   "/",
-  [SchemaValidators.checkReqBodyExists, SchemaValidators.moviePostSchema],
+  [
+    SchemaValidators.checkReqBodyExists,
+    SchemaValidators.checkMovieBodyFields,
+    SchemaValidators.moviePostSchema,
+  ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -36,7 +40,7 @@ moviesRouter.post(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
@@ -102,7 +106,7 @@ moviesRouter.get(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
@@ -122,7 +126,7 @@ moviesRouter.get(
       }
     } catch (err) {
       console.log(err);
-      res.status(500).send([{ Error: err.message }]);
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );
@@ -130,8 +134,9 @@ moviesRouter.get(
 moviesRouter.put(
   "/:movieId",
   [
-    SchemaValidators.checkReqBodyExists,
     SchemaValidators.movieIdParamSchema,
+    SchemaValidators.checkReqBodyExists,
+    SchemaValidators.checkMovieBodyFields,
     SchemaValidators.moviePutSchema,
   ],
   async (req, res) => {
@@ -142,7 +147,7 @@ moviesRouter.put(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
@@ -155,9 +160,9 @@ moviesRouter.put(
       });
 
       if (!isMovieNotExists) {
-        res
-          .status(422)
-          .send({ Error: `Movie with rank ${req.params.movieId} does not exists.` });
+        res.status(422).send({
+          Error: `Movie with rank ${req.params.movieId} does not exists.`,
+        });
         return;
       }
 
@@ -196,7 +201,7 @@ moviesRouter.put(
       res.json(movieUpdated);
     } catch (err) {
       console.log(err);
-      res.status(500).send([{ Error: err.message }]);
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );
@@ -212,23 +217,28 @@ moviesRouter.delete(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
-      const movieDeleted = await prisma.Movies.delete({
+      const movieDeleted = await prisma.Movies.deleteMany({
         where: {
           rank: Number(req.params.movieId),
         },
       });
-      if (!movieDeleted) {
-        res.send([`No movies found with movieid of ${req.params.movieId}`]);
+
+      if (movieDeleted.count > 0) {
+        res.json({
+          message: `Movie with ${req.params.movieId} rank deleted successfully`,
+        });
       } else {
-        res.json(movieDeleted);
+        res.status(404).json({
+          Error: `No movie found with rank ${req.params.movieId}.`,
+        });
       }
     } catch (err) {
       console.log(err);
-      res.status(500).send([{ Error: err.message }]);
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );

@@ -16,13 +16,17 @@ directoRouter.get("/", async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).send([{ Error: err.message }]);
+    res.status(500).send([{ Error: "Something Went Wrong" }]);
   }
 });
 
 directoRouter.post(
   "/",
-  [SchemaValidators.checkReqBodyExists, SchemaValidators.directorPostSchema],
+  [
+    SchemaValidators.checkReqBodyExists,
+    SchemaValidators.checkDirectorBodyFields,
+    SchemaValidators.directorPostSchema,
+  ],
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -31,7 +35,7 @@ directoRouter.post(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
@@ -60,7 +64,7 @@ directoRouter.get(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
@@ -78,7 +82,7 @@ directoRouter.get(
       }
     } catch (err) {
       console.log(err);
-      res.status(500).send([{ Error: err.message }]);
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );
@@ -86,8 +90,9 @@ directoRouter.get(
 directoRouter.put(
   "/:directorId",
   [
-    SchemaValidators.checkReqBodyExists,
     SchemaValidators.directorIdParamSchema,
+    SchemaValidators.checkReqBodyExists,
+    SchemaValidators.checkDirectorBodyFields,
     SchemaValidators.directorPutSchema,
   ],
   async (req, res) => {
@@ -98,7 +103,7 @@ directoRouter.put(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
@@ -129,7 +134,7 @@ directoRouter.delete(
           acc.push(err.msg);
           return acc;
         }, []);
-        res.status(422).json({ Errors: errorsList });
+        res.status(422).json({ Error: errorsList });
         return;
       }
 
@@ -139,16 +144,18 @@ directoRouter.delete(
         },
       });
 
-      if (!directorDeleted) {
-        res.send({
-          "Not Found": `No director found with directorId of ${req.params.directorId}`,
+      if (directorDeleted.count > 0) {
+        res.json({
+          message: `Director with ${req.params.directorId} rank deleted successfully`,
         });
       } else {
-        res.json(directorDeleted);
+        res.status(404).json({
+          Error: `No director found with directorId of ${req.params.directorId}`,
+        });
       }
     } catch (err) {
       console.log(err);
-      res.status(500).send([{ Error: err.message }]);
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );
