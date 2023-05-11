@@ -15,7 +15,7 @@ moviesRouter.get("/", async (req, res) => {
       },
     });
     if (!movies) {
-      res.send([{ "No Values": "No movies found" }]);
+      res.send([{ message: "No movies found" }]);
     } else {
       res.json(movies);
     }
@@ -55,7 +55,7 @@ moviesRouter.post(
       if (isMovieRankExists) {
         res
           .status(422)
-          .send({ Error: `Movie with rank ${movie.rank} alredy exists.` });
+          .send({ message: `Movie with rank ${movie.rank} alredy exists.` });
         return;
       }
 
@@ -90,7 +90,7 @@ moviesRouter.post(
       res.json(movieAdded);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ Error: err.message });
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );
@@ -120,7 +120,9 @@ moviesRouter.get(
       });
 
       if (!movie) {
-        res.send([`No movies found with movieid of ${req.params.movieId}`]);
+        res.send([
+          { Message: `No movies found with movieid of ${req.params.movieId}` },
+        ]);
       } else {
         res.json(movie);
       }
@@ -161,7 +163,7 @@ moviesRouter.put(
 
       if (!isMovieNotExists) {
         res.status(422).send({
-          Error: `Movie with rank ${req.params.movieId} does not exists.`,
+          message: `Movie with rank ${req.params.movieId} does not exists.`,
         });
         return;
       }
@@ -233,7 +235,7 @@ moviesRouter.delete(
         });
       } else {
         res.status(404).json({
-          Error: `No movie found with rank ${req.params.movieId}.`,
+          message: `No movie found with rank ${req.params.movieId}.`,
         });
       }
     } catch (err) {

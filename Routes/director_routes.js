@@ -10,7 +10,7 @@ directoRouter.get("/", async (req, res) => {
   try {
     const directors = await prisma.Directors.findMany({});
     if (!directors) {
-      res.send(["No Directors found"]);
+      res.send([{ message: "No Directors found" }]);
     } else {
       res.json(directors);
     }
@@ -48,7 +48,7 @@ directoRouter.post(
       res.json(director);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ Error: err.message });
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );
@@ -75,7 +75,7 @@ directoRouter.get(
       });
       if (!director) {
         res.send({
-          "Not Found": `No directors found with directorId of ${req.params.directorId}`,
+          message: `No directors found with directorId of ${req.params.directorId}`,
         });
       } else {
         res.json(director);
@@ -118,7 +118,7 @@ directoRouter.put(
       res.json(directorUpdated);
     } catch (err) {
       console.log(err);
-      res.status(500).send({ Error: err.message });
+      res.status(500).send([{ Error: "Something Went Wrong" }]);
     }
   }
 );
@@ -138,7 +138,7 @@ directoRouter.delete(
         return;
       }
 
-      const directorDeleted = await prisma.Directors.delete({
+      const directorDeleted = await prisma.Directors.deleteMany({
         where: {
           id: Number(req.params.directorId),
         },

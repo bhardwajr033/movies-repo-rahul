@@ -1,8 +1,15 @@
 const express = require("express");
 
+const dotenv = require("dotenv");
+
+const logger = require("./middlewares/logger");
+const { auth } = require("./middlewares/auth");
+
 const moviesRouter = require("./Routes/movie_routes");
 const directorRouter = require("./Routes/director_routes");
-const logger = require("./Logs/logger");
+const userRouter = require("./Routes/user_routes");
+
+dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
@@ -17,8 +24,9 @@ const app = express();
 app.use(express.json());
 app.use(logger);
 
-app.use("/api/movies", moviesRouter);
-app.use("/api/directors", directorRouter);
+app.use("/api", userRouter);
+app.use("/api/movies", auth, moviesRouter);
+app.use("/api/directors", auth, directorRouter);
 
 app.use("/*", (req, res) => {
   res.status(404).send({ Error: "request not found" });

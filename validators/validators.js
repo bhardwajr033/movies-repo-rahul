@@ -270,3 +270,49 @@ exports.directorPutSchema = checkSchema({
     },
   },
 });
+
+// user Validators
+
+exports.checkUserBodyFields = [
+  body().custom((value, { req }) => {
+    const allowedFields = ["email", "password"];
+    const requestBodyKeys = Object.keys(req.body);
+    const invalidFields = requestBodyKeys.filter(
+      (key) => !allowedFields.includes(key)
+    );
+
+    if (invalidFields.length > 0) {
+      throw new Error(
+        `Invalid field(s) found in request body: ${invalidFields.join(", ")}`
+      );
+    }
+
+    return true;
+  }),
+];
+
+exports.userSchema = checkSchema({
+  email: {
+    notEmpty: {
+      errorMessage: "email field is required",
+    },
+    isString: {
+      errorMessage: "email must be string",
+    },
+    isEmail: {
+      errorMessage: "email must be a valid email address",
+    },
+  },
+  password: {
+    notEmpty: {
+      errorMessage: "password field is required",
+    },
+    isString: {
+      errorMessage: "password must be string",
+    },
+    custom: {
+      options: (value) => value.length > 7,
+      errorMessage: "password should be atleast of 8 characters long",
+    },
+  },
+});
